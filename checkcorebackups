@@ -1,0 +1,33 @@
+#!/bin/bash
+#
+# Author : Dusan Djordjevic
+# Description : Script that checking backup files 5 days back and put info in html for webpage
+# Create date: 29/05/2022
+# Modified date: 29/05/022
+ELTEXPATH="/backup/eltex-chroot/backup/eltex/"
+
+
+HTML="/scripts/backupnwprovera.html"
+DATUM=`date`
+echo "<b>Generisano: $DATUM</b><br><br>" > $HTML
+
+#UREDJAJ=`cat /scripts/uredjaji.txt`
+#BROJ=`cat /scripts/brojbekapa.txt`
+#for i in "${!UREDJAJ[@]}"; do
+
+paste /scripts/uredjaji.txt /scripts/brojbekapa.txt | while read UREDJAJ BROJ; do
+
+
+BROJN=`find ${UREDJAJ} -type f -ctime +0 -ctime -5 | sort | cut -d '/' -f5,6 | wc -l`
+
+if [ $BROJN -lt ${BROJ} ]; then
+       echo "<b style='background-color:Tomato;'> CHECK - ${UREDJAJ} backup -WORNING!</b><br>" >> $HTML
+else
+        echo "<b> ${UREDJAJ} backup OK </b><br>"  >> $HTML
+fi
+
+done
+echo "</html>">> $HTML
+
+scp -rp /scripts/backupnwprovera.html root@10.0.0.12:/services/www/datumi_bekapa/
+
